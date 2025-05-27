@@ -90,11 +90,65 @@ git clone https://github.com/Maffin0666/cbr_airflow.git
 cd cbr_airflow
 ```
 
-### 3. Настройка Docker
-
+### 3. Активация Docker
+В командной строке запустим сборку контейнеров, а затем активируем их
 ```bash
 docker-compose build
+docker-compose up -d # после успешного завершения сборки - активация
 ```
+После запуска будет доступен Airflow UI: http://localhost:8080
+- Логин: airflow
+- Пароль: airflow
+
+В Docker Desktop отобразится статус контейнеров и иная информация. Можно взаимодействовать с ними (запуск, пауза и т.п.)
+
+
+## Настройка
+
+Перейдём в Airflow (открыть в браузере http://localhost:8080 , либо зайти в Docker Desktop и нажать на порт, указанный у airflow-webserver)
+
+Вводим логин и пароль, если требуется (если не делали это выше)
+
+### 1. Соединение с PostgreSQL
+
+Перейдём в Admin -> Connections
+
+Жмём на "+" (Add a new record). Вводим следующие данные в соответствующие поля:
+
+- Connection Id - Postgres
+- Connection Type - Postgres (ищем в выпадающем списке)
+- Host - postgres
+- Database - airflow
+- Login - airflow
+- Password - airflow
+- Port - 5432
+
+Не забываем нажать "Save"
+
+Соединение появится в списке. Можно проверить связь через CMD:
+```bash
+docker-compose exec postgres psql -U airflow -d airflow
+```
+При успешном подключении мы сможем писать SQL запросы. (Увидим airflow=# вместо пути (\q - для выхода))
+
+### 2. Переменные Aiflow
+
+Перейдём в Admin -> Variables
+
+Зададим нужные переменные (KEY - VAL - (Description)):
+- CBR_CURRENCY_URL - https://www.cbr.ru/scripts/XML_daily.asp - (URL курса валют)
+- CBR_BANKS_BASE_URL - https://www.cbr.ru/vfs/mcirabis/BIKNew/ - (База URL банков)
+- DB_HOST - postgres - (Хост PostgreSQL)
+- DB_NAME - airflow - (Имя Базы Данных)
+- DB_PASSWORD - airflow - (Пароль БД)
+- DB_POST - 5432 - (Порт PostgreSQL)
+- DB_USER - airflow - (Пользователь БД)
+
+
+
+
+
+
 
 
 
