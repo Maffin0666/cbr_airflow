@@ -144,6 +144,9 @@ docker-compose exec postgres psql -U airflow -d airflow
 - DB_POST - 5432 - (Порт PostgreSQL)
 - DB_USER - airflow - (Пользователь БД)
 
+### 3. DAGs
+
+Проверим, что файл `cbr_etl.py` находится в папке `dags`. Если на главной странице видно два DAG: cbr_bank_data и cbr_currency_rates - всё хорошо
 
 
 
