@@ -1,3 +1,16 @@
+# Airflow
+logs/
+plugins/__pycache__/
+
+# Docker
+.env
+data/
+
+# Python
+__pycache__/
+*.pyc
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
