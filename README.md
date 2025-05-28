@@ -35,30 +35,38 @@ This project implements an automated ETL pipeline using Apache Airflow to regula
 - **Дополнительные возможности**
   - Логирование всех операций
   - Админ-панель Airflow для управления
+  - Гибкое расписание с возможностью ручного запуска
  
 
 
 ## Технологии
 
-- **Backend**: Apache Airflow
-- **База данных**: PostgreSQL
-- **Асинхронные задачи**: Redis + Airflow-Sheduler
-- **Парсинг данных**: requests, xml.etree.ElementTree
-- **WEB:** Airflow-webserver на localhost
+### Основной стек
+- **Apache Airflow 2.5+**: Оркестрация ETL-процессов
+- **PostgreSQL 13+**: Основное хранилище данных
+- **Redis**: Очередь задач для Airflow
+- **Docker**: Контейнеризация сервисов
+
+### Библиотеки Python
+- `requests`: HTTP-запросы к API ЦБ РФ
+- `xml.etree.ElementTree`: Парсинг XML-ответов
 
 
 ## Требования
-### Windows
-- Windows 10/11 (64-bit)
-- Docker Desktop 4.12+
-- WSL 2 (Windows Subsystem for Linux)
-- 4+ GB оперативной памяти
-- 10+ GB свободного места
-### Linux
-- Ubuntu 20.04+/Debian 10+/CentOS 7+
-- 4+ GB RAM
-- 10+ GB HDD
-- Python 3.8+
+
+### Минимальные системные требования
+- **ОС**: Linux/Windows 10+ (64-bit)
+- **CPU**: 2+ ядра
+- **RAM**: 4+ GB
+- **HDD**: 20+ GB свободного места
+- **Docker**: 20.10+
+- **Docker Compose**: 1.29+
+
+### Рекомендуемые параметры
+- **CPU**: 4+ ядра
+- **RAM**: 8+ GB
+- **SSD**: Для лучшей производительности БД
+- **Интернет**: Стабильное соединение для загрузки данных
 
 
 ## Установка
@@ -107,6 +115,16 @@ docker-compose up -d
 
 А в папке проекта должна создаться нужная структура папок: появятся `dags`, `logs`, `config`, `plugins`.
 
+Для проверки состояния сервисов
+```bash
+docker-compose ps
+```
+
+Остановка системы через CMD:
+```bash
+docker-compose down
+```
+Можно остановить через сам Docker Desktop
 
 ## Настройка
 
@@ -150,7 +168,6 @@ docker-compose exec postgres psql -U airflow -d airflow
 - DB_USER - airflow - (Пользователь БД)
 
 
-
 ### 3. DAGs
 
 Проверим, что файл `cbr_etl.py` находится в папке `dags`. Если на главной странице видно два DAG: `cbr_bank_data` и `cbr_currency_rates` - всё хорошо
@@ -161,11 +178,16 @@ docker-compose exec postgres psql -U airflow -d airflow
 
 Изменяя в файле `cbr_etl.py` такие переменные как `schedule_interval`, можно менять расписание активации определённого DAGа
 
+Также можно поставить выполнение на паузу, либо запустить выполнение задания раньше времени, нажав "trigger DAG".
+
 
 ## Результат
 
 После успешного запуска Docker и настройки переменных Airflow система будет:
-- Предоставлять доступ к Airflow-панели
+- Предоставлять доступ к Airflow-панели:
+  - Анализ логов задач
+  - Просмотр статуса выполнения DAG
+  - Графическое представление зависимостей
 - Обновлять данные банков по расписанию на актуальные - не сохраняя исторические данные
 - Добавлять сегодняшние курсы валют следуя заданному расписанию
 - Хранить данные в БД (банки, курсы и прочие системные данные)
@@ -198,8 +220,10 @@ docker-compose exec postgres psql -U airflow -d airflow -c "SELECT * FROM banks;
 # для более "красивого" и понятного вывода курсов можно добавить в запрос сортировку по дате
 docker-compose exec postgres psql -U airflow -d airflow -c "SELECT * FROM currency_rates ORDER BY conversion_date DESC, from_currency;"
 ```
-
-
+Экспорт в .csv курсов сегодняшней даты:
+```bash
+docker-compose exec postgres psql -U airflow -d airflow -c "COPY (SELECT * FROM currency_rates WHERE conversion_date = CURRENT_DATE) TO STDOUT WITH CSV HEADER" > rates_temp.csv
+```
 
 
 
