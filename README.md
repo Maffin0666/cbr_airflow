@@ -181,9 +181,9 @@ docker-compose exec postgres psql -U airflow -d airflow
 # как только путь сменится на airflow=# - можем вводить SQL запросы
 # например, на выборку:
 
-select * from banks;
+SELECT * FROM banks;
 # вывод всех данных таблицы банков
-select * from currency_rates;
+SELECT * FROM currency_rates;
 # вывод всех данных таблицы курсов
 
 # для выхода из результата запроса нажимаем q
@@ -191,8 +191,11 @@ select * from currency_rates;
 ```
 Запросы и вход в режим можно писать сразу одной строкой:
 ```bash
-docker-compose exec postgres psql -U airflow -d airflow -c "select * from currency_rates;"
-docker-compose exec postgres psql -U airflow -d airflow -c "select * from banks;"
+docker-compose exec postgres psql -U airflow -d airflow -c "SELECT * FROM currency_rates;"
+docker-compose exec postgres psql -U airflow -d airflow -c "SELECT * FROM banks;"
+
+# для более "красивого" и понятного вывода курсов можно добавить в запрос сортировку по дате
+docker-compose exec postgres psql -U airflow -d airflow -c "SELECT * FROM currency_rates ORDER BY conversion_date DESC, from_currency;"
 ```
 
 
