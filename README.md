@@ -98,10 +98,26 @@ git clone https://github.com/Maffin0666/cbr_airflow.git
 cd cbr_airflow
 ```
 
+## Настройка
+
+### 1. Переменные
+Перед запуском проверим корректность переменных, которые будем передавать в систему. Это файлы `.env` (`.env_example` в данном репозитории представлен для примера наполнения), `config/variables.json`, `config/connections.json`.
+
+`.env` - содержит переменные для решения ошибки данной версии Airflow для Linux-машин и правильной связи Docker и Airflow.
+
+`variables.json` - содержит переменные информации о БД для работы DAGs и ссылки на ресурсы, с которых берутся данные о курсах и банках.
+
+`connections.json` - данные для описания нового соединения с Airflow.
+
+Импорт переменных из файлов должен осуществляться при сборке контейнера. Если нужно сделать это принудительно - используем команду в CMD уже после сборки и запуска Docker:
+```bash
+docker-compose exec airflow-webserver airflow variables import /opt/airflow/config/variables.json
+```
+
 ## Запуск
 
 ### 1. Активация Docker
-В файле `docker-compose.yaml` содержатся сведения о наших контейнерах: система Airflow, PostgreSQL, Redis, Mongodb, Rabbitmq. Последние два не используются в текущей реализации проекта, потому могут быть удалены по вашему усмотрению. Оставлены для возможных дальнейших изменений системы и их использования.
+В файле `docker-compose.yaml` содержатся сведения о наших контейнерах: система Airflow, PostgreSQL, Redis, Rabbitmq.
 
 В командной строке запустим сборку и активацию контейнеров
 ```bash
@@ -126,46 +142,34 @@ docker-compose down
 ```
 Можно остановить через сам Docker Desktop
 
-## Настройка
+
+### 2. Соединение с PostgreSQL
 
 Перейдём в Airflow (открыть в браузере http://localhost:8080 , либо зайти в Docker Desktop и нажать на порт, указанный у airflow-webserver)
 
 Вводим логин и пароль, если требуется (если не делали это выше)
 
-### 1. Соединение с PostgreSQL
-
 Перейдём в Admin -> Connections
 
-Жмём на "+" (Add a new record). Вводим следующие данные в соответствующие поля:
+Проверим список соединений, из важного: наличие `postgres` (или `postgres_default`, или обоих), `redis_default`.
 
-- Connection Id - Postgres
-- Connection Type - Postgres (ищем в выпадающем списке)
-- Host - postgres
-- Database - airflow
-- Login - airflow
-- Password - airflow
-- Port - 5432
-
-Не забываем нажать "Save"
-
-Соединение появится в списке. Можно проверить связь через CMD:
+Подключения можно проверить через CMD:
 ```bash
+# Проверить подключение к Redis
+docker-compose exec airflow-worker celery -A airflow.executors.celery_executor.app inspect ping
+
+# Проверить подключение к PostgreSQL
+docker-compose exec airflow-webserver airflow db check
+
+# Либо так. При успешном подключении мы сможем писать SQL запросы. (Увидим airflow=# вместо пути (\q - для выхода))
 docker-compose exec postgres psql -U airflow -d airflow
 ```
-При успешном подключении мы сможем писать SQL запросы. (Увидим airflow=# вместо пути (\q - для выхода))
 
-### 2. Переменные Aiflow
+### 3. Переменные Aiflow
 
 Перейдём в Admin -> Variables
 
-Зададим нужные переменные (KEY - VAL - (Description)):
-- CBR_CURRENCY_URL - https://www.cbr.ru/scripts/XML_daily.asp - (URL курса валют)
-- CBR_BANKS_BASE_URL - https://www.cbr.ru/vfs/mcirabis/BIKNew/ - (База URL банков)
-- DB_HOST - postgres - (Хост PostgreSQL)
-- DB_NAME - airflow - (Имя Базы Данных)
-- DB_PASSWORD - airflow - (Пароль БД)
-- DB_POST - 5432 - (Порт PostgreSQL)
-- DB_USER - airflow - (Пользователь БД)
+В списке должны отобразиться переменные, указанные в файле `variables.json`
 
 
 ### 3. DAGs
@@ -226,8 +230,22 @@ docker-compose exec postgres psql -U airflow -d airflow -c "COPY (SELECT * FROM 
 ```
 
 
+Наслаждайтесь работой системы
 
+```
+ /\_/\  
+( o.o )  
+ > ^ <
 
+　　　　　／＞　 フ
+　　　　　| 　_　 _|
+　 　　　／`ミ _x 彡 
+　　 　 /　　　 　 |
+　　　 /　  ヽ　　 ﾉ
+　／￣|　　 |　|　|
+　| (￣ヽ＿_ヽ_)_)
+　＼二つ
+```
 
 
 
