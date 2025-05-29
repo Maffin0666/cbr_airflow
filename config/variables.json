@@ -1,0 +1,9 @@
+{
+  "CBR_CURRENCY_URL": "https://www.cbr.ru/scripts/XML_daily.asp",
+  "CBR_BANKS_BASE_URL": "https://www.cbr.ru/vfs/mcirabis/BIKNew/",
+  "DB_HOST": "postgres",
+  "DB_NAME": "airflow",
+  "DB_PASSWORD": "airflow",
+  "DB_PORT": 5432,
+  "DB_USER": "airflow"
+}
